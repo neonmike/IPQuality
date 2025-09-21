@@ -723,6 +723,7 @@ generate_googlemap_url() {
 	fi
 	echo "https://check.place/$lat,$lon,$zoom_level,$YY"
 }
+#通过 IP 提供精确的地理位置和网络信息
 db_maxmind() {
 	local temp_info="$Font_Cyan$Font_B${sinfo[database]}${Font_I}Maxmind $Font_Suffix"
 	((ibar_step += 3))
@@ -776,6 +777,7 @@ db_maxmind() {
 		[[ ${maxmind[regcountrycode]} == "null" ]] && maxmind[regcountrycode]=$(echo "$backup_response" | jq -r '.Country.RegisteredCountry.IsoCode')
 		[[ ${maxmind[regcountry]} == "null" ]] && maxmind[regcountry]=$(echo "$backup_response" | jq -r '.Country.RegisteredCountry.Name')
 	fi
+
 	if [[ ${maxmind[lat]} != "null" && ${maxmind[lon]} != "null" ]]; then
 		maxmind[dms]=$(generate_dms "${maxmind[lat]}" "${maxmind[lon]}")
 		maxmind[map]=$(generate_googlemap_url "${maxmind[lat]}" "${maxmind[lon]}" "${maxmind[rad]}")
@@ -791,7 +793,7 @@ db_ipinfo() {
 	bar_pid="$!" && disown "$bar_pid"
 	trap "kill_progress_bar" RETURN
 	ipinfo=()
-	local RESPONSE=$(curl $CurlARG -Ls -m 10 "https://ipinfo.io/widget/demo/$IP")
+	local RESPONSE=$(curl $CurlARG -Ls -m 10 "https://ipinfo.io/widget/demo/$IP") #查询IP信息
 	echo "$RESPONSE" | jq . >/dev/null 2>&1 || RESPONSE=""
 	ipinfo[usetype]=$(echo "$RESPONSE" | jq -r '.data.asn.type')
 	ipinfo[comtype]=$(echo "$RESPONSE" | jq -r '.data.company.type')
@@ -854,6 +856,7 @@ db_ipinfo() {
 		ipinfo[map]="null"
 	fi
 }
+#scamalytics website IP数据报告
 db_scamalytics() {
 	local temp_info="$Font_Cyan$Font_B${sinfo[database]}${Font_I}SCAMALYTICS $Font_Suffix"
 	((ibar_step += 3))
@@ -1205,7 +1208,8 @@ db_ip2location() {
 	elif [[ ${ip2location[score]} -ge 66 ]]; then
 		ip2location[risk]="${sscore[high]}"
 	fi
-}
+} 
+# 用来查询 IP 地址的风险信息（比如是否是爬虫、代理、滥用者等），并从 db-ip.com 获取相关数据
 db_dbip() {
 	local temp_info="$Font_Cyan$Font_B${sinfo[database]}${Font_I}DB-IP $Font_Suffix"
 	((ibar_step += 3))
@@ -1242,6 +1246,7 @@ db_dbip() {
 	esac
 	shopt -u nocasematch
 }
+# ip whois
 db_ipwhois() {
 	local temp_info="$Font_Cyan$Font_B${sinfo[database]}${Font_I}IPWHOIS $Font_Suffix"
 	((ibar_step += 3))
@@ -1681,7 +1686,7 @@ function MediaUnlockTest_Spotify() {
 	local result1=$(Check_DNS_1 $checkunlockurl)
 	local result3=$(Check_DNS_3 $checkunlockurl)
 	local resultunlocktype=$(Get_Unlock_Type $result1 $result3)
-	local tmpresult=$(curl $CurlARG -$1 --user-agent "$UA_Browser" -s --max-time 10 -X POST "https://spclient.wg.spotify.com/signup/public/v1/account" -d "birth_day=11&birth_month=11&birth_year=2000&collect_personal_info=undefined&creation_flow=&creation_point=https%3A%2F%2Fwww.spotify.com%2Fhk-en%2F&displayname=Gay%20Lord&gender=male&iagree=1&key=a1e486e2729f46d6bb368d6b2bcda326&platform=www&referrer=&send-email=0&thirdpartyemail=0&identifier_token=AgE6YTvEzkReHNfJpO114514" -H "Accept-Language: en" 2>&1)
+	local tmpresult=$(curl $CurlARG -$1 -u-ser-agent "$UA_Browser" -s --max-time 10 -X POST "https://spclient.wg.spotify.com/signup/public/v1/account" -d "birth_day=11&birth_month=11&birth_year=2000&collect_personal_info=undefined&creation_flow=&creation_point=https%3A%2F%2Fwww.spotify.com%2Fhk-en%2F&displayname=Gay%20Lord&gender=male&iagree=1&key=a1e486e2729f46d6bb368d6b2bcda326&platform=www&referrer=&send-email=0&thirdpartyemail=0&identifier_token=AgE6YTvEzkReHNfJpO114514" -H "Accept-Language: en" 2>&1)
 	if echo "$tmpresult" | jq . >/dev/null 2>&1; then
 		local region=$(echo $tmpresult | jq -r '.country')
 		local isLaunched=$(echo $tmpresult | jq -r '.is_country_launched')
@@ -2333,72 +2338,6 @@ show_help() {
 	echo -ne "\r$shelp\n"
 	exit 0
 }
-show_ad() {
-	RANDOM=$(date +%s)
-	local -a ads=()
-	local i=1
-	while :; do
-		local content
-		content=$(curl -fsL --max-time 5 "${rawgithub}main/ref/ad$i.ans") || break
-		ads+=("$content")
-		((i++))
-	done
-	local adCount=${#ads[@]}
-	local -a indices=()
-	for ((i = 1; i <= adCount; i++)); do indices+=("$i"); done
-	for ((i = adCount - 1; i > 0; i--)); do
-		local j=$((RANDOM % (i + 1)))
-		local tmp=${indices[i]}
-		indices[i]=${indices[j]}
-		indices[j]=$tmp
-	done
-	local -a aad
-	aad[0]=$(curl -sL --max-time 5 "${rawgithub}main/ref/sponsor.ans")
-	for ((i = 0; i < adCount; i++)); do
-		aad[${indices[i]}]="${ads[i]}"
-	done
-	local rows cols
-	if ! read rows cols < <(stty size 2>/dev/null); then cols=0; fi
-	ADLines=0
-	print_pair() {
-		local left="$1" right="$2"
-		local -a L R
-		mapfile -t L <<<"$left"
-		mapfile -t R <<<"$right"
-		local i
-		for ((i = 0; i < 12; i++)); do
-			printf "%-72s$Font_Suffix     %-72s\n" "${L[i]}" "${R[i]}" 1>&2
-		done
-		ADLines=$((ADLines + 12))
-	}
-	print_block() {
-		echo "$1" 1>&2
-		ADLines=$((ADLines + 12))
-	}
-	if [[ $cols -ge 150 ]]; then
-		if ((adCount == 0)); then
-			print_block "${aad[0]}"
-		elif ((adCount % 2 == 1)); then
-			print_pair "${aad[0]}" "${aad[1]}"
-			local k
-			for ((k = 2; k <= adCount; k += 2)); do
-				print_pair "${aad[$k]}" "${aad[$((k + 1))]}"
-			done
-		else
-			print_block "${aad[0]}"
-			local k
-			for ((k = 1; k <= adCount; k += 2)); do
-				print_pair "${aad[$k]}" "${aad[$((k + 1))]}"
-			done
-		fi
-	else
-		echo "${aad[0]}" 1>&2
-		for ((i = 1; i <= adCount; i++)); do
-			echo "${aad[$i]}" 1>&2
-		done
-		ADLines=$(((adCount + 1) * 12))
-	fi
-}
 read_ref() {
 	Media_Cookie=$(curl $CurlARG -sL --retry 3 --max-time 10 "${rawgithub}main/ref/cookies.txt")
 	IATA_Database="${rawgithub}main/ref/iata-icao.csv"
@@ -2634,18 +2573,21 @@ check_IP() {
     }'
 	[[ $2 -eq 4 ]] && hide_ipv4 $IP
 	[[ $2 -eq 6 ]] && hide_ipv6 $IP
-	countRunTimes
+	countRunTimes 
 	db_maxmind $2
+	# IPinfo、ipregistry、ipapi、IP2Location、AbuseIPDB
 	db_ipinfo
 	db_scamalytics
 	[[ $mode_lite -eq 0 ]] && db_ipregistry $2 || ipregistry=()
 	db_ipapi
 	[[ $mode_lite -eq 0 ]] && db_abuseipdb $2 || abuseipdb=()
+	# IP2Location ipapi ipregistry IPQS SCAMALYTICS ipdata IPinfo IPWHOIS 风险评分
 	[[ $mode_lite -eq 0 ]] && db_ip2location $2 || ip2location=()
 	db_dbip
 	db_ipwhois
 	[[ $mode_lite -eq 0 ]] && db_ipdata $2 || ipdata=()
 	[[ $mode_lite -eq 0 ]] && db_ipqs $2 || ipqs=()
+	# 流媒体访问测试
 	MediaUnlockTest_TikTok $2
 	MediaUnlockTest_DisneyPlus $2
 	MediaUnlockTest_Netflix $2
@@ -2654,6 +2596,7 @@ check_IP() {
 	MediaUnlockTest_Spotify $2
 	OpenAITest $2
 	check_mail
+	# 六、邮局连通性及黑名单检测
 	[[ $2 -eq 4 ]] && check_dnsbl "$IP" 50
 	echo -ne "$Font_LineClear" 1>&2
 	if [ $2 -eq 4 ] || [[ $IPV4work -eq 0 || $IPV4check -eq 0 ]]; then
@@ -2703,7 +2646,7 @@ check_IP() {
 		*) echo -e "$ip_report" | sed 's/\x1b\[[0-9;]*[mGKHF]//g' >>"$outputfile" 2>/dev/null ;;
 		esac
 	fi
-}
+	}
 generate_random_user_agent
 adapt_locale
 check_connectivity
@@ -2719,7 +2662,6 @@ if [[ $ERRORcode -ne 0 ]]; then
 	echo -ne "\r$Font_B$Font_Red${swarn[$ERRORcode]}$Font_Suffix\n"
 	exit $ERRORcode
 fi
-clear
-show_ad
+
 [[ $IPV4work -ne 0 && $IPV4check -ne 0 ]] && check_IP "$IPV4" 4
-[[ $IPV6work -ne 0 && $IPV6check -ne 0 ]] && check_IP "$IPV6" 6
+[ $IPV6work -ne 0 && $IPV6check -ne 0 ]] && check_IP "$IPV6" 6
