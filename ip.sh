@@ -1,4 +1,5 @@
 #!/bin/bash
+PS4='+${BASH_SOURCE}:${LINENO}:${FUNCNAME[0]}: ' #添加行号
 script_version="v2025-09-19"
 check_bash() {
 	current_bash_version=$(bash --version | head -n 1 | awk -F ' ' '{for (i=1; i<=NF; i++) if ($i ~ /^[0-9]+\.[0-9]+\.[0-9]+/) {print $i; exit}}' | cut -d . -f 1)
@@ -596,7 +597,7 @@ get_ipv4() {
 }
 hide_ipv4() {
 	if [[ -n $1 ]]; then
-		IFS='.' read -r -a ip_parts <<<"$1"
+		IFS='.' read -r -a ip_parts <<<"$1" # 设置内在分隔符号
 		IPhide="${ip_parts[0]}.${ip_parts[1]}.*.*"
 	else
 		IPhide=""
@@ -862,7 +863,8 @@ db_scamalytics() {
 	((ibar_step += 3))
 	show_progress_bar "$temp_info" $((40 - 12 - ${sinfo[ldatabase]})) &
 	bar_pid="$!" && disown "$bar_pid"
-	trap "kill_progress_bar" RETURN
+	trap "kill_progress_bar" RETURN #当前函数执行完、即将 return 的时候，自动执行 kill_progress_bar
+
 	scamalytics=()
 	local RESPONSE=$(curl $CurlARG --user-agent "$UA_Browser" -sL -H "Referer: https://scamalytics.com" -m 10 "https://scamalytics.com/ip/$IP")
 	[[ -z $RESPONSE ]] && return 1
@@ -1208,7 +1210,7 @@ db_ip2location() {
 	elif [[ ${ip2location[score]} -ge 66 ]]; then
 		ip2location[risk]="${sscore[high]}"
 	fi
-} 
+}
 # 用来查询 IP 地址的风险信息（比如是否是爬虫、代理、滥用者等），并从 db-ip.com 获取相关数据
 db_dbip() {
 	local temp_info="$Font_Cyan$Font_B${sinfo[database]}${Font_I}DB-IP $Font_Suffix"
@@ -1437,8 +1439,8 @@ function MediaUnlockTest_TikTok() {
 	trap "kill_progress_bar" RETURN
 	tiktok=()
 	local checkunlockurl="tiktok.com"
-	local result1=$(Check_DNS_1 $checkunlockurl)
-	local result3=$(Check_DNS_3 $checkunlockurl)
+	local result1=$(Check_S_1 $checkunlockurl)
+	local result3=$(Check_DDNNS_3 $checkunlockurl)  # 检测为了防止出现DNS 劫持现象
 	local resultunlocktype=$(Get_Unlock_Type $result1 $result3)
 	local Ftmpresult=$(curl $CurlARG -$1 --user-agent "$UA_Browser" -sL -m 10 "https://www.tiktok.com/")
 	if [[ $Ftmpresult == "curl"* ]]; then
@@ -1686,7 +1688,9 @@ function MediaUnlockTest_Spotify() {
 	local result1=$(Check_DNS_1 $checkunlockurl)
 	local result3=$(Check_DNS_3 $checkunlockurl)
 	local resultunlocktype=$(Get_Unlock_Type $result1 $result3)
-	local tmpresult=$(curl $CurlARG -$1 -u-ser-agent "$UA_Browser" -s --max-time 10 -X POST "https://spclient.wg.spotify.com/signup/public/v1/account" -d "birth_day=11&birth_month=11&birth_year=2000&collect_personal_info=undefined&creation_flow=&creation_point=https%3A%2F%2Fwww.spotify.com%2Fhk-en%2F&displayname=Gay%20Lord&gender=male&iagree=1&key=a1e486e2729f46d6bb368d6b2bcda326&platform=www&referrer=&send-email=0&thirdpartyemail=0&identifier_token=AgE6YTvEzkReHNfJpO114514" -H "Accept-Language: en" 2>&1)
+	set -x
+	local tmpresult=$(curl $CurlARG -$1 --user-agent "$UA_Browser" -s --max-time 10 -X POST "https://spclient.wg.spotify.com/signup/public/v1/account" -d "birth_day=11&birth_month=11&birth_year=2000&collect_personal_info=undefined&creation_flow=&creation_point=https%3A%2F%2Fwww.spotify.com%2Fhk-en%2F&displayname=Gay%20Lord&gender=male&iagree=1&key=a1e486e2729f46d6bb368d6b2bcda326&platform=www&referrer=&send-email=0&thirdpartyemail=0&identifier_token=AgE6YTvEzkReHNfJpO114514" -H "Accept-Language: en" 2>&1)
+	echo $tmpresult
 	if echo "$tmpresult" | jq . >/dev/null 2>&1; then
 		local region=$(echo $tmpresult | jq -r '.country')
 		local isLaunched=$(echo $tmpresult | jq -r '.is_country_launched')
@@ -2573,7 +2577,7 @@ check_IP() {
     }'
 	[[ $2 -eq 4 ]] && hide_ipv4 $IP
 	[[ $2 -eq 6 ]] && hide_ipv6 $IP
-	countRunTimes 
+	countRunTimes
 	db_maxmind $2
 	# IPinfo、ipregistry、ipapi、IP2Location、AbuseIPDB
 	db_ipinfo
@@ -2646,7 +2650,7 @@ check_IP() {
 		*) echo -e "$ip_report" | sed 's/\x1b\[[0-9;]*[mGKHF]//g' >>"$outputfile" 2>/dev/null ;;
 		esac
 	fi
-	}
+}
 generate_random_user_agent
 adapt_locale
 check_connectivity

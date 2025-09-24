@@ -188,23 +188,6 @@ docker run --rm --net=host -it xykt/ipquality & docker rmi xykt/ipquality > NUL 
 
 - 感谢[spiritLHLS](https://github.com/spiritLHLS/ecs)，本脚本局部代码参考融合怪测评脚本
 
-**服务器赞助商（排名不分先后）**
-
-| 赞助商 | 商标 | 网址 | 
-| - | - | - | 
-| V.PS | ![vps_logo](https://raw.githubusercontent.com/xykt/IPQuality/main/res/sponsor/logo_vps.png) | [https://v.ps](https://v.ps)| 
-| BAGE | ![bage_logo](https://raw.githubusercontent.com/xykt/IPQuality/main/res/sponsor/logo_bage.png) | [https://bagevm.com](https://bagevm.com)|
-| LisaHost</br>丽萨主机 | ![lisa_logo](https://raw.githubusercontent.com/xykt/IPQuality/main/res/sponsor/logo_lisa.png) | [https://lisahost.com](https://lisahost.com)|
-| DreamCloud | ![dreamcloud_logo](https://raw.githubusercontent.com/xykt/IPQuality/main/res/sponsor/logo_dreamcloud.png) | [https://as211392.com](https://as211392.com)|
-| CNFaster | ![cnfaster_logo](https://raw.githubusercontent.com/xykt/IPQuality/main/res/sponsor/logo_cnfaster.png) | [https://cnfaster.com](https://cnfaster.com)|
-| UCloud</br>优刻得 | ![ucloud_logo](https://raw.githubusercontent.com/xykt/IPQuality/main/res/sponsor/logo_ucloud.png) | [https://ucloud.cn](https://www.ucloud.cn/staticIPHost?ytag=uhost_ip_github)|
-| VIRCS</br>威尔克斯 | ![vircs_logo](https://raw.githubusercontent.com/xykt/IPQuality/main/res/sponsor/logo_vircs.png) | [https://vircs.com](https://www.vircs.com/promotion?code=6)| 
-| BestProxy</br>`原生IP` | ![bestproxy_logo](https://raw.githubusercontent.com/xykt/IPQuality/main/res/sponsor/logo_bestproxy.png) | [https://bestproxy.com](https://bestproxy.com/?keyword=nstdqben)| 
-| RapidProxy</br>`原生IP` | ![rapidproxy_logo](https://raw.githubusercontent.com/xykt/IPQuality/main/res/sponsor/logo_rapidproxy.png) | [https://rapidproxy.io](https://www.rapidproxy.io/?ref=gitipquality)| 
-
-##### *E-Mail: sponsor@check.place Telegram Bot: https://t.me/xythebot*
-**仅接受长期稳定运营，信誉良好的商家*
-
 **Stars History:**
 
 ![Stargazers over time](https://starchart.cc/xykt/IPQuality.svg?background=%23FFFFFF&axis=%23333333&line=%2377ff77)
