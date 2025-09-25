@@ -96,7 +96,7 @@ declare CurlARG=""
 declare UA_Browser
 declare rawgithub
 declare Media_Cookie
-declare IATA_Database
+# declare IATA_Database
 shelp_lines=(
 	"IP QUALITY CHECK SCRIPT IP质量体检脚本"
 	"Interactive Interface:  bash <(curl -sL https://IP.Check.Place) -EM"
@@ -121,7 +121,9 @@ shelp_lines=(
 	"            -y                             Install dependencies without interupt      自动安装依赖"
 	"            -E                             Specify English Output                     指定英文输出"
 	"            -M                             Run with Interactive Interface             交互界面方式运行")
+
 shelp=$(printf "%s\n" "${shelp_lines[@]}")
+
 set_language() {
 	case "$YY" in
 	"en" | "jp" | "es" | "de" | "fr" | "ru" | "pt")
@@ -377,11 +379,13 @@ set_language() {
 	*) echo -ne "ERROR: Language not supported!" ;;
 	esac
 }
+# 统计脚本运行次数
 countRunTimes() {
 	local RunTimes=$(curl $CurlARG -s --max-time 10 "https://hits.xykt.de/ip?action=hit" 2>&1)
 	stail[today]=$(echo "$RunTimes" | jq '.daily')
 	stail[total]=$(echo "$RunTimes" | jq '.total')
 }
+# 显示进度条
 show_progress_bar() {
 	show_progress_bar_ "$@" 1>&2
 }
@@ -396,9 +400,11 @@ show_progress_bar_() {
 		echo -ne "\r$Font_Cyan$Font_B[$IP]# $1$Font_Cyan$Font_B$(printf '%*s' "$2" '' | tr ' ' '.') ${bar:ibar++*6%n:6} $(printf '%02d%%' $ibar_step) $Font_Suffix"
 	done
 }
+# 终止进度条
 kill_progress_bar() {
 	kill "$bar_pid" 2>/dev/null && echo -ne "\r"
 }
+# 安装依赖程序
 install_dependencies() {
 	if ! jq --version >/dev/null 2>&1 || ! curl --version >/dev/null 2>&1 || ! bc --version >/dev/null 2>&1 || ! nc -h >/dev/null 2>&1 || ! dig -v >/dev/null 2>&1; then
 		echo "Detecting operating system..."
@@ -453,6 +459,7 @@ install_dependencies() {
 		fi
 	fi
 }
+# 安装依赖包
 install_packages() {
 	local package_manager=$1
 	local install_command=$2
@@ -522,33 +529,34 @@ install_packages() {
 declare -A browsers=(
 	[Chrome]="139.0.7258.128 139.0.7258.67 138.0.7204.185 138.0.7204.170 138.0.7204.159 138.0.7204.102 138.0.7204.100 138.0.7204.51 138.0.7204.49 137.0.7151.122 138.0.7204.35 137.0.7151.121 137.0.7151.105 137.0.7151.104 137.0.7151.57 137.0.7151.55 136.0.7103.116 137.0.7151.40 136.0.7103.113 136.0.7103.92 135.0.7049.117 136.0.7103.48 135.0.7049.114 135.0.7049.86 135.0.7049.42 135.0.7049.41 134.0.6998.167 134.0.6998.119 134.0.6998.117 134.0.6998.37 134.0.6998.35 133.0.6943.128 133.0.6943.100 133.0.6943.59 133.0.6943.53 132.0.6834.162 133.0.6943.35 132.0.6834.160 132.0.6834.112 132.0.6834.110 131.0.6778.267 132.0.6834.83 131.0.6778.264 131.0.6778.204 131.0.6778.139 131.0.6778.109 131.0.6778.71 131.0.6778.69 130.0.6723.119 131.0.6778.33 130.0.6723.116 130.0.6723.71 130.0.6723.60 130.0.6723.58 129.0.6668.103 130.0.6723.44 129.0.6668.100 129.0.6668.72 129.0.6668.60 129.0.6668.42 128.0.6613.122 128.0.6613.121 128.0.6613.115 128.0.6613.113 127.0.6533.122 128.0.6613.36 127.0.6533.119 127.0.6533.100 127.0.6533.74 127.0.6533.72 126.0.6478.185 127.0.6533.57 126.0.6478.183 126.0.6478.128 126.0.6478.116 126.0.6478.114 126.0.6478.61 125.0.6422.176 126.0.6478.56 125.0.6422.144 126.0.6478.36 125.0.6422.142 125.0.6422.114 125.0.6422.77 125.0.6422.76 124.0.6367.210 125.0.6422.60 124.0.6367.208 124.0.6367.201 124.0.6367.156 125.0.6422.41 124.0.6367.155 124.0.6367.119 124.0.6367.92 124.0.6367.63 124.0.6367.61 123.0.6312.124 124.0.6367.60 123.0.6312.122 123.0.6312.106 123.0.6312.105 123.0.6312.60 123.0.6312.58 122.0.6261.131 123.0.6312.46 122.0.6261.129 122.0.6261.128 122.0.6261.112 122.0.6261.111 122.0.6261.71 122.0.6261.69 121.0.6167.189 122.0.6261.57 121.0.6167.187 121.0.6167.186 121.0.6167.162 121.0.6167.160 121.0.6167.140 121.0.6167.86 121.0.6167.85 120.0.6099.227 120.0.6099.225 121.0.6167.75 120.0.6099.224 120.0.6099.218 120.0.6099.216 120.0.6099.200 120.0.6099.199 120.0.6099.129 120.0.6099.110 120.0.6099.109 120.0.6099.62 120.0.6099.56"
 	[Firefox]="132.0 131.0 130.0 129.0 128.0 127.0 126.0 125.0 124.0 123.0 122.0 121.0 120.0")
+# 生成随机User-Agent
 generate_random_user_agent() {
 	local browsers_keys=(${!browsers[@]})
 	local random_browser_index=$((RANDOM % ${#browsers_keys[@]}))
 	local browser=${browsers_keys[random_browser_index]}
-	case $browser in
-	Chrome)
+    case $browser in
+        Chrome)
 		local versions=(${browsers[Chrome]})
 		local version=${versions[RANDOM % ${#versions[@]}]}
-		UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/$version Safari/537.36"
-		;;
-	Firefox)
+            UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/$version Safari/537.36"
+            ;;
+        Firefox)
 		local versions=(${browsers[Firefox]})
 		local version=${versions[RANDOM % ${#versions[@]}]}
-		UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:$version) Gecko/20100101 Firefox/$version"
-		;;
-	esac
+            UA_Browser="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:$version) Gecko/20100101 Firefox/$version"
+            ;;
+    esac
 }
 adapt_locale() {
 	local ifunicode=$(printf '\u2800')
-	[[ ${#ifunicode} -gt 3 ]] && export LC_CTYPE=en_US.UTF-8 2>/dev/null
+	[[ ${#ifunicode} -gt 3 ]] && export LC_CTYPE=en_US.UTF-8 2>/dev/null 
 }
 check_connectivity() {
-	local url="https://www.google.com/generate_204"
+	local url="https://www.google.com/generate_204" # 检查是否可以连接Google 网络
 	local timeout=2
-	local http_code
-	http_code=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout "$timeout" "$url" 2>/dev/null)
-	if [[ $http_code == "204" ]]; then
+	local httpcode
+	httpcode=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout "$timeout" "$url" 2>/dev/null)
+	if [[ $httpcode == "204" ]]; then
 		rawgithub="https://github.com/xykt/IPQuality/raw/"
 		return 0
 	else
@@ -583,6 +591,7 @@ is_private_ipv4() {
 	fi
 	return 1
 }
+# 获取公网的IPv4地址
 get_ipv4() {
 	local response
 	IPV4=""
@@ -595,6 +604,7 @@ get_ipv4() {
 		fi
 	done
 }
+# 隐藏IPv4地址
 hide_ipv4() {
 	if [[ -n $1 ]]; then
 		IFS='.' read -r -a ip_parts <<<"$1" # 设置内在分隔符号
@@ -1388,6 +1398,7 @@ function Check_DNS_IP() {
 		echo 0
 	fi
 }
+# 检测DNS是否存在
 function Check_DNS_1() {
 	local resultdns=$(nslookup $1)
 	local resultinlines=(${resultdns//$'\n'/ })
@@ -1400,6 +1411,7 @@ function Check_DNS_1() {
 	done
 	echo $(Check_DNS_IP ${resultinlines[$resultdnsindex]} ${resultinlines[1]})
 }
+# 检测DNS是否存在
 function Check_DNS_2() {
 	local resultdnstext=$(dig $1 | grep "ANSWER:")
 	local resultdnstext=${resultdnstext#*"ANSWER: "}
@@ -1410,6 +1422,7 @@ function Check_DNS_2() {
 		echo 1
 	fi
 }
+# 检测DNS是否存在随机域名
 function Check_DNS_3() {
 	local resultdnstext=$(dig "test$RANDOM$RANDOM.$1" | grep "ANSWER:")
 	echo "test$RANDOM$RANDOM.$1"
@@ -1439,8 +1452,8 @@ function MediaUnlockTest_TikTok() {
 	trap "kill_progress_bar" RETURN
 	tiktok=()
 	local checkunlockurl="tiktok.com"
-	local result1=$(Check_S_1 $checkunlockurl)
-	local result3=$(Check_DDNNS_3 $checkunlockurl)  # 检测为了防止出现DNS 劫持现象
+	local result1=$(Check_DNS_1 $checkunlockurl)
+	local result3=$(Check_DNS_3 $checkunlockurl)
 	local resultunlocktype=$(Get_Unlock_Type $result1 $result3)
 	local Ftmpresult=$(curl $CurlARG -$1 --user-agent "$UA_Browser" -sL -m 10 "https://www.tiktok.com/")
 	if [[ $Ftmpresult == "curl"* ]]; then
@@ -1884,7 +1897,7 @@ check_dnsbl() {
 	bar_pid="$!" && disown "$bar_pid"
 	trap "kill_progress_bar" RETURN
 	local num_array=($(check_dnsbl_parallel "$IP" 50))
-	smail[t]=${num_array[0]:-0}
+	smail[t]=${num_array[0]:-0} 
 	smail[c]=${num_array[1]:-0}
 	smail[m]=${num_array[2]:-0}
 	smail[b]=${num_array[3]:-0}
@@ -2344,7 +2357,7 @@ show_help() {
 }
 read_ref() {
 	Media_Cookie=$(curl $CurlARG -sL --retry 3 --max-time 10 "${rawgithub}main/ref/cookies.txt")
-	IATA_Database="${rawgithub}main/ref/iata-icao.csv"
+	# IATA_Database="${rawgithub}main/ref/iata-icao.csv"
 }
 clean_ansi() {
 	local input="$1"
@@ -2586,7 +2599,7 @@ check_IP() {
 	db_ipapi
 	[[ $mode_lite -eq 0 ]] && db_abuseipdb $2 || abuseipdb=()
 	# IP2Location ipapi ipregistry IPQS SCAMALYTICS ipdata IPinfo IPWHOIS 风险评分
-	[[ $mode_lite -eq 0 ]] && db_ip2location $2 || ip2location=()
+	[[ $mode_lite -eq 0 ]] && db_ip2location $2 || ip2location=() # 条件表达式执行方式
 	db_dbip
 	db_ipwhois
 	[[ $mode_lite -eq 0 ]] && db_ipdata $2 || ipdata=()
@@ -2652,7 +2665,7 @@ check_IP() {
 	fi
 }
 generate_random_user_agent
-adapt_locale
+adapt_locale # 区域设置
 check_connectivity
 read_ref
 get_ipv4
